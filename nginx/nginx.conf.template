@@ -1,0 +1,23 @@
+events{}
+
+http {
+    map $http_x_api_key $is_authorized {
+        default 0;
+        "mcdonalds" 1;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            if ($is_authorized = 0) {
+                return 403;
+            }
+
+            proxy_pass ${PROXY_TARGET};
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+}
